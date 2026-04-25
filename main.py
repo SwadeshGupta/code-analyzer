@@ -57,6 +57,12 @@ GROQ_MAX_TOKENS = 1024
 
 # ─── Pydantic Models ──────────────────────────────────────────────────────────
 
+class ProblemContext(BaseModel):
+    number:    str = Field(default="", description="Problem number, e.g. '240'")
+    title:     str = Field(default="", description="Problem title, e.g. 'Search a 2D Matrix II'")
+    fullTitle: str = Field(default="", description="Full display title, e.g. '240. Search a 2D Matrix II'")
+
+
 class AnalyzeRequest(BaseModel):
     code: str = Field(
         ...,
@@ -69,6 +75,10 @@ class AnalyzeRequest(BaseModel):
         min_length=1,
         max_length=64,
         description="Programming language (e.g. 'cpp', 'python').",
+    )
+    problemContext: ProblemContext = Field(
+        default_factory=ProblemContext,
+        description="Problem metadata scraped from the platform page.",
     )
 
 
@@ -144,15 +154,19 @@ ANALYSIS GUIDELINES:
 """
 
 
-def build_user_prompt(code: str, language: str) -> str:
-    return f"""Language: {language}
+def build_user_prompt(code: str, language: str, problem_title: str = "") -> str:
+    problem_line = ""
+    if problem_title:
+        problem_line = f"Problem: {problem_title}\n"
+    return f"""{problem_line}Language: {language}
 
 Code:
 ```{language}
 {code}
 ```
 
-Analyze this code and return the JSON report."""
+Analyze this code and return the JSON report. Use the problem title above to ensure your
+complexity analysis is specific to this exact problem — do not confuse similarly named problems."""
 
 
 # ─── Groq Integration ─────────────────────────────────────────────────────────
@@ -192,16 +206,16 @@ def validate_analysis(data: dict) -> AnalysisResult:
     return AnalysisResult(**data)
 
 
-async def call_groq_api(code: str, language: str) -> AnalysisResult:
+async def call_groq_api(code: str, language: str, problem_title: str = "") -> AnalysisResult:
     """
     Calls the Groq API with the system + user prompt.
     Returns a validated AnalysisResult.
     Raises HTTPException on any failure.
     """
     system_prompt = build_system_prompt()
-    user_prompt   = build_user_prompt(code, language)
+    user_prompt   = build_user_prompt(code, language, problem_title)
 
-    log.info(f"Calling Groq [{GROQ_MODEL}] for language={language}, code_length={len(code)}")
+    log.info(f"Calling Groq [{GROQ_MODEL}] for problem='{problem_title}' language={language}, code_length={len(code)}")
 
     try:
         chat_completion = groq_client.chat.completions.create(
@@ -269,9 +283,10 @@ async def analyze_code(
     if API_SECRET and x_api_secret != API_SECRET:
         raise HTTPException(status_code=401, detail="Invalid or missing X-API-Secret header.")
 
-    log.info(f"POST /analyze  language={request.language}  code_length={len(request.code)}")
+    problem_title = request.problemContext.fullTitle or request.problemContext.title or ""
+    log.info(f"POST /analyze  problem='{problem_title}'  language={request.language}  code_length={len(request.code)}")
 
-    result = await call_groq_api(request.code, request.language)
+    result = await call_groq_api(request.code, request.language, problem_title)
 
     log.info(
         f"Analysis complete — time={result.time_complexity}  "
