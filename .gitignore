@@ -1,0 +1,6 @@
+# Python artifacts
+venv/
+__pycache__/
+
+# Build artifacts
+*.zip

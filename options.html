@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Code Analyzer — Settings</title>
+  <style>
+    /* ── Design tokens (mirror content.css) ── */
+    :root {
+      --ca-bg:          #0f1117;
+      --ca-surface:     #1a1d27;
+      --ca-border:      #2a2d3a;
+      --ca-accent:      #7c6af7;
+      --ca-accent-glow: rgba(124, 106, 247, 0.25);
+      --ca-text:        #e2e8f0;
+      --ca-muted:       #6b7280;
+      --ca-success:     #34d399;
+      --ca-error:       #ff5f5f;
+      --ca-radius:      10px;
+      --ca-font:        'Inter', 'Segoe UI', system-ui, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--ca-bg);
+      color: var(--ca-text);
+      font-family: var(--ca-font);
+      font-size: 14px;
+      min-width: 380px;
+      min-height: 300px;
+      padding: 28px 24px 24px;
+      line-height: 1.6;
+    }
+
+    /* ── Header ── */
+    .ca-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .ca-header svg { color: var(--ca-accent); flex-shrink: 0; }
+
+    .ca-header-text h1 {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      color: var(--ca-text);
+    }
+
+    .ca-header-text p {
+      font-size: 12px;
+      color: var(--ca-muted);
+      margin-top: 1px;
+    }
+
+    /* ── Card ── */
+    .ca-card {
+      background: var(--ca-surface);
+      border: 1px solid var(--ca-border);
+      border-radius: var(--ca-radius);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .ca-card label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ca-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 10px;
+    }
+
+    /* ── Input row ── */
+    .ca-input-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .ca-input {
+      flex: 1;
+      background: var(--ca-bg);
+      border: 1.5px solid var(--ca-border);
+      border-radius: 7px;
+      color: var(--ca-text);
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 13px;
+      padding: 9px 12px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .ca-input:focus {
+      border-color: var(--ca-accent);
+      box-shadow: 0 0 0 3px var(--ca-accent-glow);
+    }
+
+    .ca-input::placeholder { color: var(--ca-muted); }
+
+    /* Show/hide toggle */
+    .ca-toggle-vis {
+      background: var(--ca-bg);
+      border: 1.5px solid var(--ca-border);
+      border-radius: 7px;
+      color: var(--ca-muted);
+      cursor: pointer;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .ca-toggle-vis:hover { border-color: var(--ca-accent); color: var(--ca-accent); }
+
+    /* ── Hint ── */
+    .ca-hint {
+      font-size: 11.5px;
+      color: var(--ca-muted);
+      margin-top: 10px;
+      line-height: 1.5;
+    }
+
+    .ca-hint a {
+      color: var(--ca-accent);
+      text-decoration: none;
+    }
+
+    .ca-hint a:hover { text-decoration: underline; }
+
+    /* ── Save button ── */
+    .ca-btn-save {
+      width: 100%;
+      background: var(--ca-accent);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+      font-family: var(--ca-font);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 11px;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .ca-btn-save:hover  { opacity: 0.88; }
+    .ca-btn-save:active { transform: scale(0.98); }
+    .ca-btn-save:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    /* ── Status banner ── */
+    .ca-status {
+      border-radius: 7px;
+      font-size: 12.5px;
+      font-weight: 500;
+      margin-top: 12px;
+      padding: 9px 14px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ca-status.ca-status--success {
+      background: rgba(52, 211, 153, 0.1);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      color: var(--ca-success);
+      display: flex;
+    }
+
+    .ca-status.ca-status--error {
+      background: rgba(255, 95, 95, 0.1);
+      border: 1px solid rgba(255, 95, 95, 0.3);
+      color: var(--ca-error);
+      display: flex;
+    }
+
+    /* ── Saved key indicator ── */
+    .ca-key-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--ca-muted);
+    }
+
+    .ca-key-indicator .ca-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--ca-muted);
+      flex-shrink: 0;
+    }
+
+    .ca-key-indicator.ca-key-indicator--set .ca-dot { background: var(--ca-success); }
+    .ca-key-indicator.ca-key-indicator--set { color: var(--ca-success); }
+
+    /* ── Clear link ── */
+    .ca-clear-link {
+      background: none;
+      border: none;
+      color: var(--ca-error);
+      cursor: pointer;
+      font-family: var(--ca-font);
+      font-size: 11.5px;
+      padding: 0;
+      margin-left: auto;
+      opacity: 0.75;
+      transition: opacity 0.2s;
+      display: none;
+    }
+
+    .ca-clear-link:hover { opacity: 1; text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="ca-header">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+    </svg>
+    <div class="ca-header-text">
+      <h1>Code Analyzer — CP Edition</h1>
+      <p>Settings &amp; API Configuration</p>
+    </div>
+  </div>
+
+  <!-- API Key Card -->
+  <div class="ca-card">
+    <label for="ca-api-key">Groq API Key</label>
+
+    <div class="ca-input-row">
+      <input
+        id="ca-api-key"
+        class="ca-input"
+        type="password"
+        placeholder="gsk_••••••••••••••••••••••••••••••••"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button class="ca-toggle-vis" id="ca-toggle-vis" title="Show / hide key" type="button">
+        <!-- Eye icon (hidden state) -->
+        <svg id="ca-icon-eye" width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+        <!-- Eye-off icon (visible state) — hidden by default -->
+        <svg id="ca-icon-eye-off" width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+             style="display:none">
+          <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/>
+          <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/>
+          <line x1="1" y1="1" x2="23" y2="23"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Current key status row -->
+    <div class="ca-key-indicator" id="ca-key-indicator">
+      <span class="ca-dot"></span>
+      <span id="ca-key-label">No key saved</span>
+      <button class="ca-clear-link" id="ca-clear-btn" type="button">Remove key</button>
+    </div>
+
+    <p class="ca-hint">
+      Get your free key at
+      <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a>.
+      The key is stored locally in your browser and never sent anywhere except Groq's API.
+    </p>
+  </div>
+
+  <!-- Save button -->
+  <button class="ca-btn-save" id="ca-save-btn" type="button">Save API Key</button>
+
+  <!-- Status feedback -->
+  <div class="ca-status" id="ca-status" role="alert"></div>
+
+  <script src="options.js"></script>
+</body>
+</html>

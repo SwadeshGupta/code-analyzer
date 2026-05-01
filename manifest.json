@@ -1,0 +1,47 @@
+{
+  "manifest_version": 3,
+  "name": "Code Analyzer — CP Edition",
+  "version": "2.0.0",
+  "description": "Analyzes C++ and Python competitive programming solutions using AI. Detects complexity, bottlenecks, and suggests optimizations. Bring your own Groq API key.",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://api.groq.com/*"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://leetcode.com/problems/*",
+        "https://codeforces.com/problemset/problem/*/*",
+        "https://codeforces.com/contest/*/problem/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "code-analyzer@local.dev",
+      "strict_min_version": "109.0"
+    }
+  },
+  "icons": {
+    "16": "icons/image16.png",
+    "48": "icons/image48.png",
+    "128": "icons/image128.png"
+  }
+}
