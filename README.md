@@ -73,4 +73,4 @@ Analyze solutions directly on supported Codeforces problem pages.
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/i-git-abhishek/code-analyzer.git
+git clone https://github.com/SwadeshGupta/code-analyzer.git
