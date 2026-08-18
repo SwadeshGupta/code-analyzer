@@ -13,7 +13,7 @@
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
-const GROQ_MODEL    = "llama-3.3-70b-versatile";
+const GROQ_MODEL    = "llama-3.1-8b-instant";
 const STORAGE_KEY   = "groqApiKey";
 const TIMEOUT_MS    = 45000; // 45 s
 
